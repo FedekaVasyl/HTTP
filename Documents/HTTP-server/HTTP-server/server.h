@@ -4,10 +4,11 @@
 #include <QCoreApplication>
 #include <QNetworkInterface>
 #include <iostream>
-#include <QObject>
 #include <QTcpSocket>
 #include <QTcpServer>
 #include <QDebug>
+#include <QString>
+#include "mysocket.h"
 using namespace std;
 
 class Server : public QObject
@@ -15,17 +16,18 @@ class Server : public QObject
     Q_OBJECT
 public slots:
     void Connect();
+
 private:
-    QTcpServer *server;
-    QTcpSocket *socket;
+    QTcpServer *m_server;
 
 public:
     explicit Server(QObject *parent = 0);
     virtual ~Server();
-    QTcpServer* GetServer() const;
-    void SetServer(QTcpServer *_server);
-    QTcpSocket* GetSocket() const;
-    void SetSocket(QTcpSocket *_socket);
+    QTcpServer *getServer() const;
+    void setServer(QTcpServer *server);
+
+
+
 };
 
 #endif // SERVER_H

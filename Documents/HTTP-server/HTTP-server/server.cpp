@@ -3,63 +3,40 @@
 
 Server::Server(QObject *parent) : QObject(parent)
 {
-    server = new QTcpServer(this);
-    connect(server, SIGNAL(newConnection()),this,SLOT(Connect()));
+    const int port = 8080;
+    m_server = new QTcpServer(this);
+    connect(m_server, SIGNAL(newConnection()),this,SLOT(Connect()));
     // in browser write 127.0.0:8080
-    if(!server->listen(QHostAddress::Any,8080)) // listen 127.0.0:8080
-    {
-        cout<< "\nServer could not start";
+    // listen 127.0.0:8080
+    if (!m_server->listen(QHostAddress::Any,port)) {
+        qDebug() << "\nServer could not start";
     }
-    else
-    {
-        cout<<"\nServer is waiting for a connection on port 8080";
+    else {
+        qDebug() <<"\nServer is waiting for a connection on port 8080";
     }
-}
-
-QTcpServer* Server::GetServer() const
-{
-    return this->server;
-}
-
-void Server::SetServer(QTcpServer *_server)
-{
-    this->server = _server;
-}
-
-QTcpSocket* Server::GetSocket() const
-{
-    return this->socket;
-}
-
-void Server::SetSocket(QTcpSocket *_socket)
-{
-    this->socket = _socket;
 }
 
 void Server::Connect()
 {
-    socket = server->nextPendingConnection();   // accept new connection
-    while(!(socket->waitForReadyRead(100)));    // blocks calls until new data is available for reading
+    MySocket *my_socket = new MySocket(0,m_server->nextPendingConnection());
+    QThread *new_thread = new QThread();
+    connect(new_thread,SIGNAL(started()),my_socket,SLOT(Run()));
+    connect(new_thread,SIGNAL(finished()),new_thread,SLOT(deleteLater()));
+    connect(my_socket,SIGNAL(finish()),my_socket,SLOT(deleteLater()));
+    new_thread->start();
 
-    char data[1000];
-    memset(data,'\0',1000);
-    int count = socket->read(data,1000);    // read data from socket
-    // forming the answer
-    socket->write("HTTP/1.1 200 OK\r\n");
-    socket->write("Content-Type: text/html\r\n");
-    socket->write("Connection: close\r\n");
-    socket->write("Refresh: \r\n\r\n");
-    socket->write("<!DOCTYPE html>\r\n");
-    socket->write("<html><body>");
-    socket->write(data);
-    socket->write(" </body>\n</html>\n");
-    socket->flush();
-    // close the socket
-    connect(socket, SIGNAL(disconnected()),socket, SLOT(deleteLater()));
-    socket->disconnectFromHost();
+}
+
+QTcpServer *Server::getServer() const
+{
+    return m_server;
+}
+
+void Server::setServer(QTcpServer *server)
+{
+    m_server = server;
 }
 
 Server::~Server()
 {
-    this->socket->close();
 }
