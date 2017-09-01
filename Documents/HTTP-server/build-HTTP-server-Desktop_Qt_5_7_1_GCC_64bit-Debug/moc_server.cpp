@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Server_t {
     QByteArrayData data[3];
-    char stringdata0[16];
+    char stringdata0[22];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -30,11 +30,11 @@ struct qt_meta_stringdata_Server_t {
 static const qt_meta_stringdata_Server_t qt_meta_stringdata_Server = {
     {
 QT_MOC_LITERAL(0, 0, 6), // "Server"
-QT_MOC_LITERAL(1, 7, 7), // "Connect"
-QT_MOC_LITERAL(2, 15, 0) // ""
+QT_MOC_LITERAL(1, 7, 13), // "clientConnect"
+QT_MOC_LITERAL(2, 21, 0) // ""
 
     },
-    "Server\0Connect\0"
+    "Server\0clientConnect\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -66,7 +66,7 @@ void Server::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         Server *_t = static_cast<Server *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->Connect(); break;
+        case 0: _t->clientConnect(); break;
         default: ;
         }
     }

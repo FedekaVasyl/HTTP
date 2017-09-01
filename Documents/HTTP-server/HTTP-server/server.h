@@ -8,6 +8,7 @@
 #include <QTcpServer>
 #include <QDebug>
 #include <QString>
+#include <QByteArray>
 #include "mysocket.h"
 using namespace std;
 
@@ -15,10 +16,10 @@ class Server : public QObject
 {
     Q_OBJECT
 public slots:
-    void Connect();
+    void clientConnect();
 
 private:
-    QTcpServer *m_server;
+    QTcpServer *server_;
 
 public:
     explicit Server(QObject *parent = 0);

@@ -32,10 +32,10 @@ static const qt_meta_stringdata_MySocket_t qt_meta_stringdata_MySocket = {
 QT_MOC_LITERAL(0, 0, 8), // "MySocket"
 QT_MOC_LITERAL(1, 9, 6), // "finish"
 QT_MOC_LITERAL(2, 16, 0), // ""
-QT_MOC_LITERAL(3, 17, 3) // "Run"
+QT_MOC_LITERAL(3, 17, 3) // "run"
 
     },
-    "MySocket\0finish\0\0Run"
+    "MySocket\0finish\0\0run"
 };
 #undef QT_MOC_LITERAL
 
@@ -74,7 +74,7 @@ void MySocket::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->finish(); break;
-        case 1: _t->Run(); break;
+        case 1: _t->run(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

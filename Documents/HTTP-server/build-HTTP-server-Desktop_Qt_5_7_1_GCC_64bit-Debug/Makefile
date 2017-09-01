@@ -50,11 +50,13 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../HTTP-server/main.cpp \
 		../HTTP-server/server.cpp \
-		../HTTP-server/mysocket.cpp moc_server.cpp \
+		../HTTP-server/mysocket.cpp \
+		../HTTP-server/httprequest.cpp moc_server.cpp \
 		moc_mysocket.cpp
 OBJECTS       = main.o \
 		server.o \
 		mysocket.o \
+		httprequest.o \
 		moc_server.o \
 		moc_mysocket.o
 DIST          = ../../../Qt5.7.1/5.7/gcc_64/mkspecs/features/spec_pre.prf \
@@ -210,9 +212,11 @@ DIST          = ../../../Qt5.7.1/5.7/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt5.7.1/5.7/gcc_64/mkspecs/features/yacc.prf \
 		../../../Qt5.7.1/5.7/gcc_64/mkspecs/features/lex.prf \
 		../HTTP-server/HTTP-server.pro ../HTTP-server/server.h \
-		../HTTP-server/mysocket.h ../HTTP-server/main.cpp \
+		../HTTP-server/mysocket.h \
+		../HTTP-server/httprequest.h ../HTTP-server/main.cpp \
 		../HTTP-server/server.cpp \
-		../HTTP-server/mysocket.cpp
+		../HTTP-server/mysocket.cpp \
+		../HTTP-server/httprequest.cpp
 QMAKE_TARGET  = HTTP-server
 DESTDIR       = 
 TARGET        = HTTP-server
@@ -549,8 +553,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../HTTP-server/server.h ../HTTP-server/mysocket.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../HTTP-server/main.cpp ../HTTP-server/server.cpp ../HTTP-server/mysocket.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../HTTP-server/server.h ../HTTP-server/mysocket.h ../HTTP-server/httprequest.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../HTTP-server/main.cpp ../HTTP-server/server.cpp ../HTTP-server/mysocket.cpp ../HTTP-server/httprequest.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -647,16 +651,17 @@ moc_server.cpp: ../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QCoreApplication \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpSocket \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpsocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpServer \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpserver.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QDebug \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QString \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArray \
 		../HTTP-server/mysocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QThread \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qthread.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QObject \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpSocket \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpsocket.h \
 		../HTTP-server/server.h \
 		../../../Qt5.7.1/5.7/gcc_64/bin/moc
 	/home/utech/Qt5.7.1/5.7/gcc_64/bin/moc $(DEFINES) -I/home/utech/Qt5.7.1/5.7/gcc_64/mkspecs/linux-g++ -I/home/utech/Documents/HTTP-server/HTTP-server -I/home/utech/Qt5.7.1/5.7/gcc_64/include -I/home/utech/Qt5.7.1/5.7/gcc_64/include/QtNetwork -I/home/utech/Qt5.7.1/5.7/gcc_64/include/QtCore -I. -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../HTTP-server/server.h -o moc_server.cpp
@@ -813,16 +818,17 @@ main.o: ../HTTP-server/main.cpp ../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QCore
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpSocket \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpsocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpServer \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpserver.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QDebug \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QString \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArray \
 		../HTTP-server/mysocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QThread \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qthread.h \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QObject \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpSocket \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpsocket.h
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QObject
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../HTTP-server/main.cpp
 
 server.o: ../HTTP-server/server.cpp ../HTTP-server/server.h \
@@ -894,16 +900,17 @@ server.o: ../HTTP-server/server.cpp ../HTTP-server/server.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpSocket \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpsocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpServer \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpserver.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QDebug \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QString \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArray \
 		../HTTP-server/mysocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QThread \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qthread.h \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QObject \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/QTcpSocket \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtNetwork/qtcpsocket.h
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QObject
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o server.o ../HTTP-server/server.cpp
 
 mysocket.o: ../HTTP-server/mysocket.cpp ../HTTP-server/mysocket.h \
@@ -973,8 +980,85 @@ mysocket.o: ../HTTP-server/mysocket.cpp ../HTTP-server/mysocket.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qset.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
 		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer.h \
-		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../HTTP-server/httprequest.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArray \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QString \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QMap \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QMapIterator \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArrayList \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArrayListIterator
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysocket.o ../HTTP-server/mysocket.cpp
+
+httprequest.o: ../HTTP-server/httprequest.cpp ../HTTP-server/httprequest.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArray \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qbytearray.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qrefcount.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qatomic.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qglobal.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qconfig.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qfeatures.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qtypetraits.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qisenum.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsysinfo.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qlogging.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qflags.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qmutex.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qnumeric.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qversiontagging.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qnamespace.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qarraydata.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qstring.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qchar.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QString \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QMap \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qmap.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qiterator.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qlist.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qalgorithms.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qpair.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qstringlist.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qregexp.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qdebug.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qhash.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qtextstream.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qiodevice.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qobject.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcoreevent.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qmetatype.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qobject_impl.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qlocale.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qvariant.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qshareddata.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qvector.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qpoint.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qset.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QMapIterator \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArrayList \
+		../../../Qt5.7.1/5.7/gcc_64/include/QtCore/QByteArrayListIterator
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o httprequest.o ../HTTP-server/httprequest.cpp
 
 moc_server.o: moc_server.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_server.o moc_server.cpp
