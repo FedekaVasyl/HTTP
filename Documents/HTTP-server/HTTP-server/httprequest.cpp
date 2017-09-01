@@ -75,7 +75,7 @@ bool HttpRequest::parseHeaders(QByteArray header_line)
         i++;
     }
     i++;
-    header_value = header_line.mid(i+1);
+    header_value = header_line.mid(i + 1);
     headers_.insert(header_name, header_value);
     return true;
 }
@@ -95,6 +95,6 @@ void HttpRequest::parseBody(QByteArray body_line)
     if (body_line.count() == 1) {
         this->body_ = "";
     } else {
-        body_ = body_line.mid(0);
+        body_ = body_line.mid(1);
     }
 }
