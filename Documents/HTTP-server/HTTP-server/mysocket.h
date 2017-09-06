@@ -1,9 +1,8 @@
 #ifndef MYSOCKET_H
 #define MYSOCKET_H
-#include <QThread>
+
 #include <QObject>
 #include <QTcpSocket>
-#include <string>
 #include "httprequest.h"
 
 
@@ -15,19 +14,22 @@ public slots:
 signals:
     void finish();
 private:
-    QTcpSocket *socket_;
-
+    QTcpSocket *socket;
+    HttpRequest request;
 public:
-    explicit MySocket(QObject *parent = 0, QTcpSocket *socket = 0);
+    explicit MySocket(QObject *parent = NULL, QTcpSocket *socket = NULL);
     virtual ~MySocket();
 
     QTcpSocket *getSocket() const;
     void setSocket(QTcpSocket *socket);
+    HttpRequest getRequest() const;
+    void setRequest(HttpRequest request);
 
-    QByteArray parseMessage(QByteArray message);
-    QByteArray readData();
-    void writeToSocket(HttpRequest data);
+    bool readData();
+    bool writeToSocket();
     void closeSocket();
+
+    friend class TestMySocket;
 };
 
 #endif // MYSOCKET_H

@@ -1,83 +1,134 @@
 #include "mysocket.h"
+#include <QThread>
+#include <QDebug>
 
 QTcpSocket *MySocket::getSocket() const
 {
-    return socket_;
+    return socket;
 }
 
 void MySocket::setSocket(QTcpSocket *socket)
 {
-    socket_ = socket;
+    this->socket = socket;
+}
+
+HttpRequest MySocket::getRequest() const
+{
+    return request;
+}
+
+void MySocket::setRequest(HttpRequest request)
+{
+    this->request = request;
 }
 
 MySocket::MySocket(QObject *parent, QTcpSocket *socket) : QObject(parent)
 {
-    socket_ = socket;
+    this->socket = socket;
 }
 
 void MySocket::run()
 {
     // forming the answer
-    HttpRequest request(readData());
-    writeToSocket(request);
+    if (!readData()) {
+        qDebug() << "Incorrect data!";
+        closeSocket();
+        return;
+    }
+    if (!writeToSocket()) {
+        qDebug() << "Unable write to socket!";
+        closeSocket();
+        return;
+    }
     closeSocket();
     emit this->finish();
 }
 
-QByteArray MySocket::readData()
+bool MySocket::readData()
 {
-    const int kLength = 1000;
-    const int kWait = 1000;
-    char packet[kLength];
     QByteArray data;
-    memset(packet, '\0', kLength);
-    socket_->waitForReadyRead(kWait);
-    while (socket_->read(packet, kLength)) {   // read data from socket
-        data += packet;
-        memset(packet, '\0', kLength);
+    HttpRequestParser parser;
+    HttpRequest new_request;
+    QString length;
+    int kWait = 1000;
+    const char *blanck_line = "\r\n\r\n";
+    while (!data.contains(blanck_line)) {  //read while not find blanck line
+        if (!socket->waitForReadyRead(kWait)) {
+            qDebug() << "Time is up!";
+            return false;
+        }
+        data += socket->readAll();
     }
-    return data;
+    new_request = parser.getHttpRequest(data);
+    if (new_request.method.isNull()) {
+       qDebug() << "Incorrect method!";
+       return false;
+    }
+    if (new_request.uri.isNull()) {
+        qDebug() << "Incorrect URI!";
+        return false;
+    }
+    if (new_request.protocol_version.isNull()) {
+        qDebug() << "Incorrect protocol version!";
+        return false;
+    }
+    length = new_request.headers.value("Content-Length");
+    if(!length.isNull()) {
+        while (data.count() != length.toInt()) {
+            if (!socket->waitForReadyRead(kWait)) {
+                qDebug() << "Time is up!";
+                return false;
+            }
+
+            data += socket->readAll();
+        }
+        new_request.body = data.right(length.toInt());
+    } else {
+        new_request.body = QByteArray();
+    }
+    setRequest(new_request);
+    return true;
 }
 
 void MySocket::closeSocket()
 {
-    socket_->flush();
+    const int kWait = 1000;
     // close the socket
-    connect(socket_, SIGNAL(disconnected()),
-            socket_, SLOT(deleteLater()));
-    socket_->disconnectFromHost();
-    socket_->close();
-}
-
-QByteArray MySocket::parseMessage(QByteArray message)
-{
-    QByteArray data;
-    int i, j;
-    const QString kNewLine = "<br>";
-    for (i = 0, j = 0; i < message.length(); i++, j++) {
-        if (message[i] == '\r' && message[i + 1] == '\n') {
-            data += kNewLine;
-            j += 3;
-            i++;
-            continue;
-        }
-        data[j] = message[i];
+    connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    socket->disconnectFromHost();
+    if (socket->state() == QAbstractSocket::UnconnectedState
+            || socket->waitForDisconnected(kWait)) {
+        qDebug() << "Disconnected";
+    } else {
+        qDebug() << socket->error();
     }
-    return data;
+    socket->close();
 }
 
-void MySocket::writeToSocket(HttpRequest data)
+bool MySocket::writeToSocket()
 {
+    HttpRequestParser parser;
+    QByteArray htmlPage = parser.formAsHtmlPage(this->request);
+    if (htmlPage.isNull()) {
+        qDebug() << "Incorrect data!";
+        return false;
+    }
+    if (!socket->isOpen() || !socket->isValid()) {
+        qDebug() << "Socket is closed or invalid";
+        return false;
+    }
     const char *kHeaders ="HTTP/1.1 200 OK\r\n"
                          "Content-Type: text/html\r\n"
                          "Connection: close\r\n\r\n";
     const char *kHtmlBegin = "<!DOCTYPE html>\r\n"
                              "<html><body>";
     const char *kHtmlEnd = " </body>\n</html>\n";
-    socket_->write(kHeaders);
-    socket_->write(kHtmlBegin);
-    socket_->write(data.formAsHtmlPage().toStdString().c_str());
-    socket_->write(kHtmlEnd);
+    socket->write(kHeaders);
+    socket->write(kHtmlBegin);
+    socket->write(htmlPage.toStdString().c_str());
+    socket->write(kHtmlEnd);
+    socket->flush();
+    return true;
 }
 
 MySocket::~MySocket()

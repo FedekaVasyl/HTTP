@@ -3,26 +3,32 @@
 #include <QByteArray>
 #include <QString>
 #include <QMap>
-#include <QMapIterator>
-#include <QByteArrayList>
-#include <QByteArrayListIterator>
+#include <QMetaType>
+
 struct HttpRequest {
-    QString method_;
-    QString uri_;
-    QString protocol_version_;
-    //QString content_type_;
-    //QString content_length_;
-    QMap<QString, QString> headers_;
-    QByteArray body_;
+    QString method;
+    QString uri;
+    QString protocol_version;
+    QMap<QString, QString> headers;
+    QByteArray body;
+    friend bool operator == (const HttpRequest &left, const HttpRequest &right);
+};
 
-    HttpRequest(QByteArray request);
-    ~HttpRequest();
+Q_DECLARE_METATYPE(HttpRequest)
 
-    QByteArray formAsHtmlPage();
-    void parseRequestLine(QByteArray request_line);
-    bool parseHeaders(QByteArray header_line);
-    void parseBody(QByteArray body_line);
-    QString findHeaderValue(QString key);
+class HttpRequestParser {
+private:
+
+    void parseRequestLine(const QByteArray &request_line, HttpRequest &request);
+    bool parseHeaders(const QByteArray &header_line, HttpRequest &request);
+public:
+    HttpRequestParser();
+    ~HttpRequestParser();
+
+    QByteArray formAsHtmlPage(const HttpRequest &request);
+    HttpRequest getHttpRequest(const QByteArray &data);
+
+    friend class TestHttpRequest;
 };
 
 #endif // HTTPREQUEST_H

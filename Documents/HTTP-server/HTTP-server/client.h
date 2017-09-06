@@ -6,6 +6,8 @@ class Client
 {
 public:
     Client();
+
+    bool isGreater(int first, int second);
 };
 
 #endif // CLIENT_H
