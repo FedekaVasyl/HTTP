@@ -19,6 +19,12 @@ private slots:
 
     void testFormAsHtmlPage();
     void testFormAsHtmlPage_data();
+
+    void testIsCorectMethod();
+    void testIsCorectMethod_data();
+
+    void testRequestMessageHeaderSize();
+    void testRequestMessageHeaderSize_data();
 };
 
 #endif // TESTHTTPREQUEST_H

@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     mysocket.cpp \
     httprequest.cpp \
     unittests/testhttprequest.cpp \
-    unittests/testmysocket.cpp
+    unittests/testmysocket.cpp \
+    mythread.cpp
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
@@ -25,7 +26,8 @@ HEADERS += \
     mysocket.h \
     httprequest.h \
     unittests/testhttprequest.h \
-    unittests/testmysocket.h
+    unittests/testmysocket.h \
+    mythread.h
 
 DISTFILES += \
     unittests/requestline

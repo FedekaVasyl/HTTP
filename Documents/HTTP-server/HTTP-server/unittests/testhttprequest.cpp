@@ -22,7 +22,7 @@ void TestHttpRequest::testParseRequestLine_data()
     HttpRequest verificationNullRequest;
     verificationRequest.method = "GET";
     verificationRequest.uri = "/";
-    verificationRequest.protocol_version = "HTTP/1.1";
+    verificationRequest.protocolVersion = "HTTP/1.1";
     QTest::newRow("1st test") << QByteArray("GET / HTTP/1.1") << verificationRequest;
     QTest::newRow("2nd test") << QByteArray("GET") << verificationNullRequest;
     QTest::newRow("3rd test") << QByteArray("GET /") << verificationNullRequest;
@@ -59,19 +59,19 @@ void TestHttpRequest::testGetHttpRequest()
 {
     HttpRequestParser parser;
     QFETCH(QByteArray, data);
-    QFETCH(HttpRequest, httpRequestExspected);
-    QCOMPARE(parser.getHttpRequest(data), httpRequestExspected);
+    QFETCH(HttpRequest, httpRequestExpected);
+    QCOMPARE(parser.getHttpRequest(data), httpRequestExpected);
 }
 
 void TestHttpRequest::testGetHttpRequest_data()
 {
     QTest::addColumn<QByteArray>("data");
-    QTest::addColumn<HttpRequest>("httpRequestExspected");
+    QTest::addColumn<HttpRequest>("httpRequestExpected");
     HttpRequest verificationRequest;
     HttpRequest verificationNullRequest;
     verificationRequest.method = "GET";
     verificationRequest.uri = "/";
-    verificationRequest.protocol_version = "HTTP/1.1";
+    verificationRequest.protocolVersion = "HTTP/1.1";
     verificationRequest.headers.insert("Content-Length", "12");
     QTest::newRow("1st test") << QByteArray("GET / HTTP/1.1\r\nContent-Length: 12\r\n\r\n")
                               << verificationRequest;
@@ -87,20 +87,20 @@ void TestHttpRequest::testFormAsHtmlPage()
 {
     HttpRequestParser parser;
     QFETCH(HttpRequest, request);
-    QFETCH(QByteArray, returnExspected);
-    QCOMPARE(parser.formAsHtmlPage(request), returnExspected);
+    QFETCH(QByteArray, returnExpected);
+    QCOMPARE(parser.formAsHtmlPage(request), returnExpected);
 }
 
 void TestHttpRequest::testFormAsHtmlPage_data()
 {
     QTest::addColumn<HttpRequest>("request");
-    QTest::addColumn<QByteArray>("returnExspected");
+    QTest::addColumn<QByteArray>("returnExpected");
     HttpRequest verificationRequest;
     const QByteArray verificationHtmlForm = "Method: GET<br>URI: /<br>Protocol-Version: HTTP/1.1<br><h3>HEADERS:</h3><h3>BODY:</h3><br>";
     QByteArray verificationNullHtmlForm;
     verificationRequest.method = "GET";
     verificationRequest.uri = "/";
-    verificationRequest.protocol_version = "HTTP/1.1";
+    verificationRequest.protocolVersion = "HTTP/1.1";
     QTest::newRow("1st test") << verificationRequest << verificationHtmlForm;
     verificationRequest.method = QString();
     QTest::newRow("2nd test") << verificationRequest << verificationNullHtmlForm;
@@ -108,7 +108,58 @@ void TestHttpRequest::testFormAsHtmlPage_data()
     verificationRequest.uri = QString();
     QTest::newRow("3rd test") << verificationRequest << verificationNullHtmlForm;
     verificationRequest.uri = "/";
-    verificationRequest.protocol_version = QString();
+    verificationRequest.protocolVersion = QString();
     QTest::newRow("4th test") << verificationRequest << verificationNullHtmlForm;
 
+}
+
+void TestHttpRequest::testIsCorectMethod()
+{
+    HttpRequestParser parser;
+    QFETCH(QByteArray, method);
+    QFETCH(bool, returnExpected);
+    QCOMPARE(parser.isCorrectMethod(method), returnExpected);
+}
+
+void TestHttpRequest::testIsCorectMethod_data()
+{
+    QTest::addColumn<QByteArray>("method");
+    QTest::addColumn<bool>("returnExpected");
+    QTest::newRow("1st test") << QByteArray("POST") << true;
+    QTest::newRow("2nd test") << QByteArray("post") << false;
+    QTest::newRow("3rd test") << QByteArray("DeLeTe") << false;
+    QTest::newRow("4th test") << QByteArray("GEt") << false;
+    QTest::newRow("5th test") << QByteArray("method") << false;
+    QTest::newRow("6th test") << QByteArray("CONNECT") << true;
+    QTest::newRow("7th test") << QByteArray("OPTIONS") << true;
+    QTest::newRow("8th test") << QByteArray() << false;
+}
+
+void TestHttpRequest::testRequestMessageHeaderSize()
+{
+    HttpRequestParser parser;
+    QFETCH(HttpRequest, request);
+    QFETCH(int, returnExpected);
+    QCOMPARE(parser.requestMessageHeaderSize(request), returnExpected);
+}
+
+void TestHttpRequest::testRequestMessageHeaderSize_data()
+{
+    QTest::addColumn<HttpRequest>("request");
+    QTest::addColumn<int>("returnExpected");
+    HttpRequest verificationRequest;
+    QTest::newRow("1st test") << verificationRequest << 0;
+    verificationRequest.method = "POST";
+    QTest::newRow("2nd test") << verificationRequest << 0;
+    verificationRequest.uri = "/";
+    QTest::newRow("3nd test") << verificationRequest << 0;
+    verificationRequest.protocolVersion = "HTTP/1.1";
+    QTest::newRow("4th test") << verificationRequest << QString("POST / HTTP/1.1\r\n\r\n").count();
+    verificationRequest.headers.insert("Content-Length", "10");
+    verificationRequest.body = "AABBCCDDEE";
+    QString request = "POST / HTTP/1.1\r\nContent-Length: 10\r\n\r\n";
+    QTest::newRow("5th test") << verificationRequest << request.count();
+    verificationRequest.headers.insert("Host", "http://utechcorp.com/");
+    request += "Host: http://utechcorp.com/\r\n";
+    QTest::newRow("6th test") << verificationRequest << request.count();
 }

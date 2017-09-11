@@ -9,13 +9,7 @@
 class MySocket : public QObject
 {
     Q_OBJECT
-public slots:
-    void run();
-signals:
-    void finish();
-private:
-    QTcpSocket *socket;
-    HttpRequest request;
+
 public:
     explicit MySocket(QObject *parent = NULL, QTcpSocket *socket = NULL);
     virtual ~MySocket();
@@ -25,11 +19,18 @@ public:
     HttpRequest getRequest() const;
     void setRequest(HttpRequest request);
 
-    bool readData();
     bool writeToSocket();
     void closeSocket();
 
     friend class TestMySocket;
+private slots:
+    void readyRead();
+    void timeIsUp();
+signals:
+    void finish();
+private:
+    QTcpSocket *socket;
+    HttpRequest request;
 };
 
 #endif // MYSOCKET_H

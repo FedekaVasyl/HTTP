@@ -3,12 +3,12 @@
 #include <QByteArray>
 #include <QString>
 #include <QMap>
-#include <QMetaType>
+#include <QObject>
 
 struct HttpRequest {
     QString method;
     QString uri;
-    QString protocol_version;
+    QString protocolVersion;
     QMap<QString, QString> headers;
     QByteArray body;
     friend bool operator == (const HttpRequest &left, const HttpRequest &right);
@@ -16,19 +16,28 @@ struct HttpRequest {
 
 Q_DECLARE_METATYPE(HttpRequest)
 
-class HttpRequestParser {
-private:
+class HttpRequestParser : public QObject
+{
+    Q_OBJECT
 
-    void parseRequestLine(const QByteArray &request_line, HttpRequest &request);
-    bool parseHeaders(const QByteArray &header_line, HttpRequest &request);
 public:
-    HttpRequestParser();
+    enum method {OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT};
+    Q_ENUM(method)
+
+    HttpRequestParser(QObject *parent = 0);
     ~HttpRequestParser();
 
     QByteArray formAsHtmlPage(const HttpRequest &request);
     HttpRequest getHttpRequest(const QByteArray &data);
+    int requestMessageHeaderSize(const HttpRequest &request);
 
     friend class TestHttpRequest;
+
+private:
+
+    void parseRequestLine(const QByteArray &requestLine, HttpRequest &request);
+    bool parseHeaders(const QByteArray &headerLine, HttpRequest &request);
+    bool isCorrectMethod(const QByteArray &method);
 };
 
 #endif // HTTPREQUEST_H

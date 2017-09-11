@@ -1,6 +1,13 @@
 #include "mysocket.h"
-#include <QThread>
 #include <QDebug>
+#include <QTimer>
+
+MySocket::MySocket(QObject *parent, QTcpSocket *socket) : QObject(parent)
+{
+    this->socket = socket;
+    connect(this->socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    QTimer::singleShot(10000, this, SLOT(timeIsUp()));
+}
 
 QTcpSocket *MySocket::getSocket() const
 {
@@ -22,78 +29,68 @@ void MySocket::setRequest(HttpRequest request)
     this->request = request;
 }
 
-MySocket::MySocket(QObject *parent, QTcpSocket *socket) : QObject(parent)
+void MySocket::readyRead()
 {
-    this->socket = socket;
-}
-
-void MySocket::run()
-{
-    // forming the answer
-    if (!readData()) {
-        qDebug() << "Incorrect data!";
-        closeSocket();
-        return;
-    }
-    if (!writeToSocket()) {
-        qDebug() << "Unable write to socket!";
-        closeSocket();
-        return;
-    }
-    closeSocket();
-    emit this->finish();
-}
-
-bool MySocket::readData()
-{
-    QByteArray data;
+    const char *blanckLine = "\r\n\r\n";
+    thread_local QByteArray data;
+    thread_local bool isParsed = false;
     HttpRequestParser parser;
-    HttpRequest new_request;
+    HttpRequest newRequest;
     QString length;
-    int kWait = 1000;
-    const char *blanck_line = "\r\n\r\n";
-    while (!data.contains(blanck_line)) {  //read while not find blanck line
-        if (!socket->waitForReadyRead(kWait)) {
-            qDebug() << "Time is up!";
-            return false;
-        }
-        data += socket->readAll();
-    }
-    new_request = parser.getHttpRequest(data);
-    if (new_request.method.isNull()) {
-       qDebug() << "Incorrect method!";
-       return false;
-    }
-    if (new_request.uri.isNull()) {
-        qDebug() << "Incorrect URI!";
-        return false;
-    }
-    if (new_request.protocol_version.isNull()) {
-        qDebug() << "Incorrect protocol version!";
-        return false;
-    }
-    length = new_request.headers.value("Content-Length");
-    if(!length.isNull()) {
-        while (data.count() != length.toInt()) {
-            if (!socket->waitForReadyRead(kWait)) {
-                qDebug() << "Time is up!";
-                return false;
+    data += socket->readAll();
+    if (data.contains(blanckLine)) {
+        if (!isParsed) {
+            newRequest = parser.getHttpRequest(data);
+            if (newRequest.method.isNull()) {
+               qDebug() << "Incorrect method!";
+               closeSocket();
+               return;
             }
-
-            data += socket->readAll();
+            if (newRequest.uri.isNull()) {
+                qDebug() << "Incorrect URI!";
+                closeSocket();
+                return;
+            }
+            if (newRequest.protocolVersion.isNull()) {
+                qDebug() << "Incorrect protocol version!";
+                closeSocket();
+                return;
+            }
+            isParsed = true;
+            request = newRequest;
         }
-        new_request.body = data.right(length.toInt());
-    } else {
-        new_request.body = QByteArray();
+        length = request.headers.value("Content-Length");
+        if (length.isNull()) {
+            request.body = QByteArray();
+            if (!writeToSocket()) {
+                qDebug() << "Unable write to socket!";
+                closeSocket();
+                return;
+            }
+        } else {
+            if (length.toInt() + parser.requestMessageHeaderSize(request) == data.size()) {
+                request.body = data.right(length.toInt());
+                if (!writeToSocket()) {
+                    qDebug() << "Unable write to socket!";
+                    closeSocket();
+                    return;
+                }
+            }
+        }
     }
-    setRequest(new_request);
-    return true;
+}
+
+void MySocket::timeIsUp()
+{
+    qDebug() << "Connection time has passed";
+    closeSocket();
 }
 
 void MySocket::closeSocket()
 {
     const int kWait = 1000;
-    // close the socket
+    HttpRequest nullRequest;
+    request = nullRequest;
     connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
     socket->disconnectFromHost();
     if (socket->state() == QAbstractSocket::UnconnectedState
@@ -101,6 +98,7 @@ void MySocket::closeSocket()
         qDebug() << "Disconnected";
     } else {
         qDebug() << socket->error();
+        emit this->finish();
     }
     socket->close();
 }
@@ -125,9 +123,10 @@ bool MySocket::writeToSocket()
     const char *kHtmlEnd = " </body>\n</html>\n";
     socket->write(kHeaders);
     socket->write(kHtmlBegin);
-    socket->write(htmlPage.toStdString().c_str());
+    socket->write(htmlPage);
     socket->write(kHtmlEnd);
     socket->flush();
+    closeSocket();
     return true;
 }
 

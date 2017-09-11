@@ -1,25 +1,18 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QTcpSocket>
 #include <QTcpServer>
-#include <QByteArray>
-#include "mysocket.h"
 
-class Server : public QObject
+class Server : public QTcpServer
 {
     Q_OBJECT
-public slots:
-    void clientConnect();
-
-private:
-    QTcpServer *server;
 
 public:
-    explicit Server(QObject *parent = 0);
+    explicit Server();
     virtual ~Server();
-    QTcpServer *getServer() const;
-    void setServer(QTcpServer *server);
+
+protected:
+    virtual void incomingConnection(qintptr handle) Q_DECL_OVERRIDE;
 };
 
 #endif // SERVER_H
